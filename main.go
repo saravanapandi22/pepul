@@ -41,9 +41,28 @@ func init() {
 	UserController = controllers.New(UserService)
 	Server = gin.Default()
 }
+
+func UserMiddlewareValidator() gin.HandlerFunc {
+	return func(gctx *gin.Context) {
+		var UserInput models.User
+		if err := gctx.ShouldBindJSON(&UserInput); err == nil {
+			UserValidate := validator.New()
+			if err := UserValidate.Struct(&UserInput); err != nil {
+				gctx.JSON(http.StatusBadRequest, gin.H{
+					"error":err.Error(),
+				})
+				gctx.Abort()
+				return
+			}
+		}
+		gctx.Next()
+	}
+}
+
 func main() {
 	defer mongoClient.Disconnect(ctx)
-
+	Server.Use(UserMiddlewareValidator())
+	Server.MaxMultipartMemory = 8 << 20
 	path := Server.Group("/p1")
 	UserController.RegisteredRoutes(path)
 }

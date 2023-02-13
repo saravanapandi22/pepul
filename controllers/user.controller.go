@@ -19,8 +19,13 @@ func New (UserService services.UserService) UserController {
 
 func (uc *UserController) CreateUser (ctx *gin.Context) {
 	var UserData models.User
-	if err := ctx.ShouldBindJSON(&UserData); err != nil {
+	if err := ctx.ShouldBind(&UserData); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+	err := ctx.SaveUploadedFile(UserData.PictureUpload, "/image")
+	if err != nil {
+		ctx.JSON(http.StatusMethodNotAllowed, gin.H{"message": err.Error()})
 		return
 	}
 	err := uc.UserService.CreateUser(&UserData)

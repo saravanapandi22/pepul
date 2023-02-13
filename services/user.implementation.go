@@ -28,7 +28,9 @@ func (ui *UserImplementation) CreateUser(UserModel *models.User) error {
 
 func (ui *UserImplementation) GetAll() ([]*models.User, error) {
 	var UsersData []*models.User
-	cursor, err := ui.mongoCollection.Find(ui.ctx, bson.D{{}})
+	var Pagination = AddPagination()
+	opts := options.Find().SetLimit(Pagination.Limit)
+	cursor, err := ui.mongoCollection.Find(ui.ctx, bson.D{{}}, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -71,4 +73,12 @@ func (ui *UserImplementation) DeleteUser(Name *string) error {
 		return errors.New("no data affected")
 	}
 	return nil
+}
+
+
+func AddPagination() models.Pagination {
+	return models.Pagination{
+		Limit: 2,
+		Page: 1,
+	}
 }

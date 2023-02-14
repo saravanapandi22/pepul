@@ -28,8 +28,16 @@ func (ui *UserImplementation) CreateUser(UserModel *models.User) error {
 
 func (ui *UserImplementation) GetAll() ([]*models.User, error) {
 	var UsersData []*models.User
-	var Pagination = AddPagination()
-	opts := options.Find().SetLimit(Pagination.Limit)
+	gctx := gin.Context{
+		Request:  nil,
+		Writer:   nil,
+		Params:   nil,
+		Keys:     nil,
+		Errors:   nil,
+		Accepted: nil,
+	}
+	var Pagination = AddPagination(&gctx)
+	opts := options.Find().SetLimit(int64(Pagination.Limit))
 	cursor, err := ui.mongoCollection.Find(ui.ctx, bson.D{{}}, opts)
 	if err != nil {
 		return nil, err
@@ -76,9 +84,11 @@ func (ui *UserImplementation) DeleteUser(Name *string) error {
 }
 
 
-func AddPagination() models.Pagination {
+func AddPagination(gctx *gin.Context) models.Pagination {
+	limit, _ := strconv.Atoi(gctx.DefaultQuery("limit", "10"))
+	page, _ := strconv.Atoi(gctx.DefaultQuery("page", "0"))
 	return models.Pagination{
-		Limit: 2,
-		Page: 1,
+		Limit: limit,
+		Page: page,
 	}
 }

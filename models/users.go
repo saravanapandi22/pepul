@@ -10,6 +10,6 @@ type User struct {
 }
 
 type Pagination struct {
-	Limit int64 `json:"limit"`
-	Page int64 `json:"page"`
+	Limit int `json:"limit"`
+	Page int `json:"page"`
 }
